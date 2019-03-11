@@ -141,6 +141,8 @@ void init_camera(void)
 	}
 	
 	
+	configure_twi();              // initialize twi 
+	
 	/* ov7740 Initialization */
 	while (ov_init(BOARD_TWI) == 1) {
 	}
@@ -157,6 +159,24 @@ void configure_camera(void)
 {
 	
 	
+}
+
+
+
+
+
+uint8_t start_capture(void)
+{
+	
+	
+}
+
+
+
+uint8_t find_image_len(void)
+{
+
+
 }
 
 

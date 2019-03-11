@@ -14,11 +14,11 @@
 
 
 
-// Image sensor VSYNC pin.
-#define OV7740_VSYNC_PIO	       OV_VSYNC_PIO
-#define OV7740_VSYNC_ID		       OV_VSYNC_ID
-#define OV7740_VSYNC_MASK              OV_VSYNC_MASK
-#define OV7740_VSYNC_TYPE              OV_VSYNC_TYPE
+// Image sensor VSYNC pin. Make sure we change these pins for our own configuration!!!!!!!!!
+#define OV7740_VSYNC_PIO	       PIOA          //  OV_VSYNC_PIO
+#define OV7740_VSYNC_ID		       ID_PIOA       //  OV_VSYNC_ID
+#define OV7740_VSYNC_MASK          PIO_PA15      //  OV_VSYNC_MASK
+#define OV7740_VSYNC_TYPE          PIO_PULLUP    //  OV_VSYNC_TYPE
 
 
 /** TWI0 pins */
@@ -38,9 +38,9 @@
 
 
 /* Image sensor board defines. */
-// Image sensor Power pin.
-#define OV_POWER_PIO                   OV_SW_OVT_PIO
-#define OV_POWER_MASK                  OV_SW_OVT_MASK
+// Image sensor Power pin.             Make sure we change these pins for our own configuration!!!!!!!!!
+#define OV_POWER_PIO                   PIOC       //  OV_SW_OVT_PIO
+#define OV_POWER_MASK                  PIO_PC10   //  OV_SW_OVT_MASK
 
 
 
