@@ -14,17 +14,8 @@
 
 
 
-// Image sensor VSYNC pin.
-#define OV7740_VSYNC_PIO	       OV_VSYNC_PIO
-#define OV7740_VSYNC_ID		       OV_VSYNC_ID
-#define OV7740_VSYNC_MASK              OV_VSYNC_MASK
-#define OV7740_VSYNC_TYPE              OV_VSYNC_TYPE
 
 
-/** TWI0 pins */
-#define ID_BOARD_TWI		               ID_TWI0
-#define BOARD_TWI			                 TWI0
-#define BOARD_TWI_IRQn		             TWI0_IRQn
 
 /* TWI clock frequency in Hz (400KHz) */
 #define TWI_CLK     (400000UL)
@@ -38,9 +29,9 @@
 
 
 /* Image sensor board defines. */
-// Image sensor Power pin.
-#define OV_POWER_PIO                   OV_SW_OVT_PIO
-#define OV_POWER_MASK                  OV_SW_OVT_MASK
+// Image sensor Power pin.             Make sure we change these pins for our own configuration!!!!!!!!!
+#define OV_POWER_PIO                   PIOC       //  OV_SW_OVT_PIO
+#define OV_POWER_MASK                  PIO_PC10   //  OV_SW_OVT_MASK
 
 
 

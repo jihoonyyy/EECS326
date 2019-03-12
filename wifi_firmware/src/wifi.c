@@ -12,6 +12,8 @@ volatile uint32_t received_byte_wifi = 0;
 volatile uint32_t input_pos_wifi = 0;
 volatile bool new_rx_wifi = false;
 volatile bool wifi_comm_success = false;
+volatile uint32_t web_setup_flag = false;
+
 
 
 // Handler for incoming data from the WIFI. Calls process_incoming_byte_wifi when a new byte arrives
@@ -47,15 +49,15 @@ void wifi_command_response_handler(uint32_t ul_id, uint32_t ul_mask)						// id 
 	
 	wifi_comm_success = true;
 	process_data_wifi();
-	for (int jj=0;jj<MAX_INPUT_WIFI;jj++) input_line_wifi[jj] = 0;                          // Once the data was processed, clear the buffer
-	input_pos_wifi = 0;
+	//for (int jj=0;jj<MAX_INPUT_WIFI;jj++) input_line_wifi[jj] = 0;                          // Once the data was processed, clear the buffer, but consider not using this loop
+	//input_pos_wifi = 0;
 }
 
 
 // Processes the response of the AMW136, which should be stored in the buffer filled by process_incoming_byte_wifi. Looking for certain responses that the AMW136 gives
 void process_data_wifi(void)
 {
-		if (strstr(input_line_wifi, "")){
+		if (strstr(input_line_wifi, "Start transfer")){                 // string provided from the firmware design pdf
 			ioport_toggle_pin_level(PIN_LED);
 		}
 }
@@ -63,7 +65,10 @@ void process_data_wifi(void)
 
 void wifi_web_setup_handler(uint32_t ul_id, uint32_t ul_mask)
 {
+	unused(ul_id);
+	unused(ul_mask);
 	
+	web_setup_flag = true;
 	
 }
 
@@ -126,4 +131,42 @@ void configure_wifi_comm_pin(void)
 
 	/* Enable PIO interrupt lines. */
 	pio_enable_interrupt(WIFI_COMM_PIO, WIFI_COMM_PIN_NUM);
+}
+
+
+// Configuration of button interrupt to initiate the web setup
+void configure_wifi_web_setup_pin(void)
+{
+	
+	/* Configure PIO clock. */
+	pmc_enable_periph_clk(WIFI_SETUP_ID);
+
+	/* Initialize PIO interrupt handler, see PIO definition in conf_board.h
+	**/
+	pio_handler_set(WIFI_SETUP_PIO, WIFI_SETUP_ID, WIFI_SETUP_PIN_NUM, WIFI_SETUP_ATTR, wifi_web_setup_handler);
+
+	/* Enable PIO controller IRQs. */
+	NVIC_EnableIRQ((IRQn_Type)WIFI_SETUP_ID);
+
+	/* Enable PIO interrupt lines. */
+	pio_enable_interrupt(WIFI_SETUP_PIO, WIFI_SETUP_PIN_NUM);
+	
+}
+
+
+/* Writes a command (comm) to the AMW136, and waits either for an acknowledgment or a timeout. The timeout can be created by setting the global variable "counts" to zero, 
+which will automatically increment every second, and waiting while counts < cnt */
+void write_wifi_command(char* comm, uint8_t cnt)
+{
+	
+	
+}
+
+
+// Writes an image from SAM4s8B to the AMW136. If the length of the image is zero (i.e.. the image is not valid), return. Otherwise, follow the protocol
+void write_image_to_file(void)
+{
+	
+	
+	
 }
