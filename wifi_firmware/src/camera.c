@@ -35,6 +35,8 @@ void init_vsync_interrupts(void)
 
 	/* Enable PIO controller IRQs */
 	NVIC_EnableIRQ((IRQn_Type)OV7740_VSYNC_ID);
+
+	// pio_enable_interrupt(OV2640_VSYNC_PIO, OV2640_VSYNC_MASK)
 }
 
 
@@ -88,6 +90,7 @@ void pio_capture_init(Pio *p_pio, uint32_t ul_id)
 	p_pio->PIO_PCMR &= ~((uint32_t)PIO_PCMR_ALWYS);
 	p_pio->PIO_PCMR &= ~((uint32_t)PIO_PCMR_HALFS);
 
+// might not need this since we are in JPEG
 	#if !defined(DEFAULT_MODE_COLORED)
 	/* Samples only data with even index */
 	p_pio->PIO_PCMR |= PIO_PCMR_HALFS;
@@ -128,7 +131,7 @@ void init_camera(void)
 	init_vsync_interrupts();
 
 	/* Init PIO capture*/
-		pio_capture_init(OV_DATA_BUS_PIO, OV_DATA_BUS_ID);
+	pio_capture_init(OV_DATA_BUS_PIO, OV_DATA_BUS_ID);
 
 	/* Turn on ov7740 image sensor using power pin */
 	ov_power(true, OV_POWER_PIO, OV_POWER_MASK);
@@ -143,12 +146,6 @@ void init_camera(void)
 	
 	configure_twi();              // initialize twi 
 	
-	/* ov7740 Initialization */
-	while (ov_init(BOARD_TWI) == 1) {
-	}
-
-	/* ov7740 configuration */
-	ov_configure(BOARD_TWI, QVGA_YUV422_20FPS);
 
 	/* Wait 3 seconds to let the image sensor to adapt to environment */
 	delay_ms(3000);	
@@ -157,7 +154,12 @@ void init_camera(void)
 
 void configure_camera(void)
 {
-	
+		/* ov7740 Initialization */
+	while (ov_init(BOARD_TWI) == 1) {
+	}
+
+	/* ov7740 configuration */
+	ov_configure(BOARD_TWI, QVGA_YUV422_20FPS);
 	
 }
 
@@ -167,7 +169,42 @@ void configure_camera(void)
 
 uint8_t start_capture(void)
 {
-	
+	/* Set capturing destination address*/
+	g_p_uc_cap_dest_buf = (uint8_t *)CAP_DEST;
+
+	/* Set cap_rows value*/
+	g_us_cap_rows = IMAGE_HEIGHT;
+
+	/* Enable vsync interrupt*/
+	pio_enable_interrupt(OV7740_VSYNC_PIO, OV7740_VSYNC_MASK);
+
+	/* Capture acquisition will start on rising edge of Vsync signal.
+	 * So wait g_vsync_flag = 1 before start process
+	 */
+	while (!g_ul_vsync_flag) {
+	}
+
+	/* Disable vsync interrupt*/
+	pio_disable_interrupt(OV7740_VSYNC_PIO, OV7740_VSYNC_MASK);
+
+	/* Enable pio capture*/
+	pio_capture_enable(OV7740_DATA_BUS_PIO);
+
+	/* Capture data and send it to external SRAM memory thanks to PDC
+	 * feature */
+	pio_capture_to_buffer(OV7740_DATA_BUS_PIO, g_p_uc_cap_dest_buf,
+			(g_us_cap_line * g_us_cap_rows) >> 2);
+
+	/* Wait end of capture*/
+	while (!((OV7740_DATA_BUS_PIO->PIO_PCISR & PIO_PCIMR_RXBUFF) ==
+			PIO_PCIMR_RXBUFF)) {
+	}
+
+	/* Disable pio capture*/
+	pio_capture_disable(OV7740_DATA_BUS_PIO);
+
+	/* Reset vsync flag*/
+	g_ul_vsync_flag = false;	
 	
 }
 
