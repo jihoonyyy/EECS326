@@ -59,7 +59,19 @@ int main (void)
 	
 	
 	// Wait for the WIFI to connect to a network. Listen for the Web Setup Pin
-	while()
+	while(ioport_get_pin_level(WIFI_WEB_SETUP_PIN) == 0)
+	{
+		if (web_setup_flag == true)
+		{
+			usart_write_line(WIFI_USART, "Setting up web\r\n");
+			web_setup_flag = false;
+		}
+		
+	}
+	
+	// Configure the camera
+	
+	configure_camera();
 	
 
 }

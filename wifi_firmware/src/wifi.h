@@ -72,6 +72,7 @@ volatile bool wifi_comm_success;
 volatile bool new_rx_wifi;
 volatile char input_line_wifi[MAX_INPUT_WIFI];    // giving 10000 bytes so that buffer doesn't run over easily
 volatile uint32_t web_setup_flag;
+volatile bool image_transfer_flag;
 
 
 // void wifi_usart_handler(void);

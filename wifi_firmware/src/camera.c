@@ -127,6 +127,11 @@ uint8_t pio_capture_to_buffer(Pio *p_pio, uint8_t *uc_buf, uint32_t ul_size)    
 
 void init_camera(void)
 {
+	
+	
+	gpio_configure_pin(HSYNC_GPIO, HSYNC_FLAGS);
+	
+	
 	/* Init Vsync handler*/
 	init_vsync_interrupts();
 

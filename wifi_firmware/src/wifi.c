@@ -6,14 +6,15 @@
  */ 
 
 #include "wifi.h"
-
+#include "timer_interface.h"
 
 volatile uint32_t received_byte_wifi = 0;
 volatile uint32_t input_pos_wifi = 0;
 volatile bool new_rx_wifi = false;
 volatile bool wifi_comm_success = false;
 volatile uint32_t web_setup_flag = false;
-
+volatile bool image_transfer_flag = false;
+volatile book wifi_websocket_flag = false;
 
 
 // Handler for incoming data from the WIFI. Calls process_incoming_byte_wifi when a new byte arrives
@@ -58,7 +59,17 @@ void wifi_command_response_handler(uint32_t ul_id, uint32_t ul_mask)						// id 
 void process_data_wifi(void)
 {
 		if (strstr(input_line_wifi, "Start transfer")){                 // string provided from the firmware design pdf
-			ioport_toggle_pin_level(PIN_LED);
+			image_transfer_flag = true;
+		}
+		
+		if (strstr(input_line_wifi, "None"))
+		{
+			wifi_websocket_flag = false;
+		}
+		
+		if (strstr(input_line_wifi, "Websocket connected"))             // not necessarily required
+		{
+			wifi_websocket_flag = true;
 		}
 }
 
@@ -158,7 +169,17 @@ void configure_wifi_web_setup_pin(void)
 which will automatically increment every second, and waiting while counts < cnt */
 void write_wifi_command(char* comm, uint8_t cnt)
 {
-	
+	usart_write_line(WIFI_USART, comm);
+	counts = 0;
+	while (counts < cnt)
+	{
+		if(wifi_comm_success)						// if wifi_comm_success is true
+		{
+			wifi_comm_success = false;				// reset the flag
+			break;									// get out of the loop
+		}
+		
+	}
 	
 }
 
@@ -170,3 +191,9 @@ void write_image_to_file(void)
 	
 	
 }
+
+
+
+
+
+
