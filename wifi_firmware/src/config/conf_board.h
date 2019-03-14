@@ -24,12 +24,15 @@
 #define BOARD_TWI			                 TWI0
 #define BOARD_TWI_IRQn		             TWI0_IRQn
 
+// OV VSYNC pin configuration
+#define OV2640_VSYNC_PIO			VSYNC_PIO
+#define OV2640_VSYNC_ID				VSYNC_ID
+#define OV2640_VSYNC_MASK			VSYNC_MASK
+#define OV2640_VSYNC_TYPE			VSYNC_TYPE
 
-// Image sensor VSYNC pin. Make sure we change these pins for our own configuration!!!!!!!!!
-#define OV7740_VSYNC_PIO	       PIOA          //  OV_VSYNC_PIO
-#define OV7740_VSYNC_ID		       ID_PIOA       //  OV_VSYNC_ID
-#define OV7740_VSYNC_MASK          PIO_PA15      //  OV_VSYNC_MASK
-#define OV7740_VSYNC_TYPE          PIO_PULLUP    //  OV_VSYNC_TYPE
+// OV DATA pin configuration
+#define OV2640_DATA_BUS_PIO			OV_DATA_BUS_PIO
+#define OV2640_DATA_BUS_ID          OV_DATA_BUS_ID
 
 
 
