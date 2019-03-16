@@ -14,7 +14,7 @@ volatile bool new_rx_wifi = false;
 volatile bool wifi_comm_success = false;
 volatile uint32_t web_setup_flag = false;
 volatile bool image_transfer_flag = false;
-volatile book wifi_websocket_flag = false;
+volatile bool wifi_websocket_flag = false;
 
 
 // Handler for incoming data from the WIFI. Calls process_incoming_byte_wifi when a new byte arrives
@@ -50,8 +50,8 @@ void wifi_command_response_handler(uint32_t ul_id, uint32_t ul_mask)						// id 
 	
 	wifi_comm_success = true;
 	process_data_wifi();
-	//for (int jj=0;jj<MAX_INPUT_WIFI;jj++) input_line_wifi[jj] = 0;                          // Once the data was processed, clear the buffer, but consider not using this loop
-	//input_pos_wifi = 0;
+	for (int jj=0;jj<MAX_INPUT_WIFI;jj++) input_line_wifi[jj] = 0;                          // Once the data was processed, clear the buffer, but consider not using this loop
+	input_pos_wifi = 0;
 }
 
 
@@ -72,6 +72,8 @@ void process_data_wifi(void)
 			wifi_websocket_flag = true;
 		}
 }
+
+
 
 
 void wifi_web_setup_handler(uint32_t ul_id, uint32_t ul_mask)
@@ -178,17 +180,36 @@ void write_wifi_command(char* comm, uint8_t cnt)
 			wifi_comm_success = false;				// reset the flag
 			break;									// get out of the loop
 		}
-		
 	}
-	
 }
+		
+
+
+
 
 
 // Writes an image from SAM4s8B to the AMW136. If the length of the image is zero (i.e.. the image is not valid), return. Otherwise, follow the protocol
 void write_image_to_file(void)
 {
-	
-	
+	uint32_t img_length = find_image_len();
+	if (img_length == 0) {
+		return;
+	}
+	else {
+		char img_array[1000];
+		sprintf(img_array, "image_transfer %d\r\n", img_length);
+		
+		write_wifi_command(img_array, 3);				// write command to the AMW136
+		if(!image_transfer_flag) {						// if image is not passed, don't finish it
+			return;  
+		}
+
+		for (uint32_t i = start_point; i <= start_point + img_length; i++) {
+				usart_putchar(WIFI_USART, image_buffer[i]);
+		}
+		image_transfer_flag = false;						// reset the flag after data transfer
+		delay_ms(50);										// slight delay according to the step
+	}		
 	
 }
 
@@ -197,3 +218,72 @@ void write_image_to_file(void)
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//void write_image_to_file(void) {
+	//if (!find_image_len()) {
+		//return;
+	//}
+	//else {
+		//char string[100] = {0};
+		//sprintf(string,"image_transfer %d\r\n",img_length);
+		//write_wifi_command(string, 2);
+		//counts = 0;
+		//bool timeout_var = false;
+		//while (!ready_to_transfer_flag) {
+			//if (counts > 3) {
+				//timeout_var = true;
+				//break;
+			//}
+		//}
+		//if (!timeout_var) {
+			//for (int ii = start_count; ii <= stop_count + 1=
+			//; ii++) {
+				//usart_putchar(WIFI_USART, img_buf[ii]);
+			//}
+			//ready_to_transfer_flag = false;
+			//delay_ms(50);
+		//}
+	//}
+		//
+//}
+
+
+
+
+//void process_data_wifi()
+//{
+	//if (strstr(input_line_wifi, "2") && network_check) {
+		//wifi_connected_flag = true;
+		//network_check = false;
+	//}
+	//if (strstr(input_line_wifi, "Start transfer")) {
+		//ready_to_transfer_flag = true;
+	//}
+	//if (strstr(input_line_wifi, ",") || strstr(input_line_wifi, "Websocket connected")) {
+		//websocket_open_flag = true;
+	//}
+	//if (strstr(input_line_wifi, "None")) {
+		//websocket_open_flag = false;
+	//}
+	//if (strstr(input_line_wifi, "Client not connected")) {
+		//websocket_open_flag = false;
+	//}
+//}

@@ -11,7 +11,7 @@
 #include "camera.h"
 
 volatile uint32_t g_ul_vsync_flag = false;
-
+volatile uint32_t start_point = 0;
 
 
 // brief Handler for vertical synchronization using by the OV7740 image sensor.
@@ -124,7 +124,9 @@ uint8_t pio_capture_to_buffer(Pio *p_pio, uint8_t *uc_buf, uint32_t ul_size)
 
 void init_camera(void)
 {
-	
+	// configure clock pins
+	gpio_configure_pin(PIN_PCK1, PIN_PCK1_FLAGS);
+		
 	// configure HSYNC and VSYNC
 	gpio_configure_pin(HSYNC_GPIO, HSYNC_FLAGS);
 	gpio_configure_pin(VSYNC_GPIO, VSYNC_FLAGS);
@@ -156,7 +158,7 @@ void init_camera(void)
 
 	/* Init PCK0 to work at 24 Mhz */
 	/* 96/4=24 Mhz */
-	PMC->PMC_PCK[1] = (PMC_PCK_PRES_CLK_4 | PMC_PCK_CSS_PLLA_CLK);				// changed from 0 to 1 since we are using PCK1, for address info, refer to page 529 of MCU data sheet
+	PMC->PMC_PCK[1] = (PMC_PCK_PRES_CLK_4 | PMC_PCK_CSS_PLLB_CLK);				// changed from 0 to 1 since we are using PCK1, for address info, refer to page 529 of MCU data sheet
 	PMC->PMC_SCER = PMC_SCER_PCK1;												// changed from 0 to 1 since we are using PCK1
 	while (!(PMC->PMC_SCSR & PMC_SCSR_PCK1)) {									// changed from 0 to 1 since we are using PCK1
 	}
@@ -239,7 +241,7 @@ uint8_t find_image_len (void)
 	{
 		if (image_buffer[i] == 0xff && image_buffer[i + 1] == 0xd8)
 		{
-			uint32_t start_point = i;
+			start_point = i;
 			for (start_point = i; start_point < sizeof (image_buffer); start_point++){
 				
 				finder = finder + 1;
@@ -256,5 +258,24 @@ uint8_t find_image_len (void)
 
 
 
-
+uint8_t find_image_len(void){
+	uint8_t start_flag = 0;
+	uint32_t idx;
+	uint32_t  image_start_idx = 0;
+	uint32_t   image_end_idx = 0;
+	for(idx = 0; idx+1 < sizeof(image_buff);idx++){
+		if(image_buff[idx] == 0xff && image_buff[idx+1] == 0xd8){
+			image_start_idx = idx;
+			start_flag = 1;
+		}
+		if(image_buff[idx] == 0xff && image_buff[idx+1] == 0xd9 && start_flag == 1){
+			image_end_idx = idx+2;
+			return 1;
+		}
+	}
+	image_start_idx = 0;
+	image_end_idx = 0;
+	
+	return 0;
+}
 

@@ -63,9 +63,10 @@
 #define WIFI_SETUP_PIO				PIOB
 #define WIFI_SETUP_ID				ID_PIOB
 #define WIFI_SETUP_ATTR				PIO_IT_RISE_EDGE
+#define WIFI_SETUP_PIN				PIO_PB4_IDX
 
 
-#define MAX_INPUT_WIFI 10000;
+#define MAX_INPUT_WIFI 1000;
 volatile uint32_t received_byte_wifi;
 volatile uint32_t input_pos_wifi;
 volatile bool wifi_comm_success;
@@ -73,6 +74,7 @@ volatile bool new_rx_wifi;
 volatile char input_line_wifi[MAX_INPUT_WIFI];    // giving 10000 bytes so that buffer doesn't run over easily
 volatile uint32_t web_setup_flag;
 volatile bool image_transfer_flag;
+volatile bool wifi_websocket_flag;
 
 
 // void wifi_usart_handler(void);

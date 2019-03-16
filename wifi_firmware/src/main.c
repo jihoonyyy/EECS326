@@ -69,9 +69,46 @@ int main (void)
 		
 	}
 	
-	// Configure the camera
+	// Initialize the camera
+	init_camera();
 	
+	
+	// Configure the camera
 	configure_camera();
 	
-
+	usart_write_line(WIFI_USART, "set sy c p off\r\n");					// Telling the wifi chip to turn off the command prompt
+	usart_write_line(WIFI_USART, "set sy c e off\r\n");					// Telling the wifi chip to turn off the echo
+	
+	
+	
+	while(1)
+	{
+		if (web_setup_flag) {											// Check for Web Setup Request, and goes through this "if" if flag is up
+			usart_write_line(WIFI_USART, "Setting up web\r\n");
+			web_setup_flag = false;			
+			}
+			
+		else {															// wifi setup flag is false, so check if network is connected
+			if (ioport_get_pin_level(WIFI_WEB_SETUP_PIN) == 1) {		// if connected*
+				if (!wifi_websocket_flag)					
+				{
+					delay_ms(1000);							// if not, delay 1s and start over
+				}
+	
+				else										// if there is an open stream
+				{
+						start_capture();					// capturing
+						write_image_to_file();				// transferring it to AMW136
+				}
+			}
+			
+			else {
+				gpio_set_pin_low(WIFI_RESET_PIN);   // Pulling the pin low, hard resetting
+				delay_ms(100);                      // Delaying for 100 ms, as instructed
+				gpio_set_pin_high(WIFI_RESET_PIN);  // Pulling the pin high
+			}
+		}
+	}
+	
+	
 }
