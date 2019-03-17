@@ -37,11 +37,11 @@
 
 
 
-
-#define WIFI_CTS_PIN		PIO_PA7_IDX
+#define OV2640_RESET_PIN    PIO_PA20_IDX
+#define WIFI_CTS_PIN		PIO_PA8_IDX
 #define WIFI_RESET_PIN      PIO_PB3_IDX
 #define WIFI_WEB_SETUP_PIN  PIO_PB4_IDX          // Used PB4 for setup pin
-
-
+#define WIFI_COMM_PIN		PIO_PB10_IDX
+// #define WIFI_
 
 #endif // CONF_BOARD_H
