@@ -191,8 +191,10 @@ void write_wifi_command(char* comm, uint8_t cnt)
 // Writes an image from SAM4s8B to the AMW136. If the length of the image is zero (i.e.. the image is not valid), return. Otherwise, follow the protocol
 void write_image_to_file(void)
 {
-	uint32_t img_length = find_image_len();
-	if (img_length == 0) {
+	uint8_t image_available = find_image_len();
+	uint32_t img_length = end_point - start_point;
+	
+	if (image_available == 0) {
 		return;
 	}
 	else {
@@ -204,7 +206,7 @@ void write_image_to_file(void)
 			return;  
 		}
 
-		for (uint32_t i = start_point; i <= start_point + img_length; i++) {
+		for (uint32_t i = start_point; i <= end_point + 1; i++) {
 				usart_putchar(WIFI_USART, image_buffer[i]);
 		}
 		image_transfer_flag = false;						// reset the flag after data transfer

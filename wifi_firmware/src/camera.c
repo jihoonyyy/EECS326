@@ -11,7 +11,6 @@
 #include "camera.h"
 
 volatile uint32_t g_ul_vsync_flag = false;
-volatile uint32_t start_point = 0;
 
 
 // brief Handler for vertical synchronization using by the OV7740 image sensor.
@@ -235,47 +234,33 @@ uint8_t start_capture(void)
 
 uint8_t find_image_len (void)
 {
-	uint32_t finder = 0;
-
-	for (uint32_t i = 0; i < sizeof(image_buffer); i++)
+	start_point = 0;
+	end_point = 0;
+	bool no_error_flag = false;																					// This flag is used for checking error
+	
+	for (uint32_t i = 0; i+1 < sizeof(image_buffer); i++)
 	{
-		if (image_buffer[i] == 0xff && image_buffer[i + 1] == 0xd8)
+		if (image_buffer[i] == 0xff && image_buffer[i + 1] == 0xd8)												// Checking for initial value for JPEG
 		{
 			start_point = i;
-			for (start_point = i; start_point < sizeof (image_buffer); start_point++){
-				
-				finder = finder + 1;
-				if (image_buffer[start_point] == 0xff && image_buffer[start_point + 1] == 0xd9)
-				{
-					finder = finder +1;
-				}
-			}
+			no_error_flag = true;																				// we've detected initial value for JPEG
 		}
-	}
-	return finder;
-}
-
-
-
-
-uint8_t find_image_len(void){
-	uint8_t start_flag = 0;
-	uint32_t idx;
-	uint32_t  image_start_idx = 0;
-	uint32_t   image_end_idx = 0;
-	for(idx = 0; idx+1 < sizeof(image_buff);idx++){
-		if(image_buff[idx] == 0xff && image_buff[idx+1] == 0xd8){
-			image_start_idx = idx;
-			start_flag = 1;
-		}
-		if(image_buff[idx] == 0xff && image_buff[idx+1] == 0xd9 && start_flag == 1){
-			image_end_idx = idx+2;
+		
+		if (image_buffer[i] == 0xff && image_buffer[i + 1] == 0xd9 && no_error_flag == true) {
+			end_point = i+2;
 			return 1;
 		}
+		
 	}
-	image_start_idx = 0;
-	image_end_idx = 0;
 	
+	
+	// reset everything if not proper
+	start_point = 0;																						
+	end_point = 0;
 	return 0;
 }
+
+
+
+
 

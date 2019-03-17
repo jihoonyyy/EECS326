@@ -140,6 +140,7 @@ PIO_OUTPUT_1, PIO_DEFAULT}
 #define MAX_BUFFER					100000
 volatile uint32_t g_ul_vsync_flag;    /* Vsync signal information (true if it's triggered and false otherwise) */
 volatile uint32_t start_point;
+volatile uint32_t end_point;
 
 
 volatile char image_buffer[MAX_BUFFER]
