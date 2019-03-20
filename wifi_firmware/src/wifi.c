@@ -6,6 +6,7 @@
  */ 
 
 #include "wifi.h"
+#include "camera.h"
 #include "timer_interface.h"
 
 volatile uint32_t received_byte_wifi = 0;
@@ -15,6 +16,7 @@ volatile bool wifi_comm_success = false;
 volatile uint32_t web_setup_flag = false;
 volatile bool image_transfer_flag = false;
 volatile bool wifi_websocket_flag = false;
+volatile bool wifi_status = false;
 
 
 // Handler for incoming data from the WIFI. Calls process_incoming_byte_wifi when a new byte arrives
@@ -37,8 +39,7 @@ void WIFI_USART_HANDLER(void)
 // Stores every incoming by (in_byte) from the AMW136 in a buffer
 void process_incoming_byte_wifi(uint8_t in_byte)									
 {
-	input_line_wifi[input_pos_wifi] = in_byte;            // Saves the incoming byte into a next position
-	input_pos_wifi = input_pos_wifi + 1;				  // Increments the position
+	input_line_wifi[input_pos_wifi++] = in_byte;            // Saves the incoming byte into a next position, and increment
 }
 
 
@@ -50,7 +51,7 @@ void wifi_command_response_handler(uint32_t ul_id, uint32_t ul_mask)						// id 
 	
 	wifi_comm_success = true;
 	process_data_wifi();
-	for (int jj=0;jj<MAX_INPUT_WIFI;jj++) input_line_wifi[jj] = 0;                          // Once the data was processed, clear the buffer, but consider not using this loop
+	for (int jj=0; jj<MAX_INPUT_WIFI; jj++) {input_line_wifi[jj] = 0; }                         // Once the data was processed, clear the buffer, but consider not using this loop
 	input_pos_wifi = 0;
 }
 
@@ -60,16 +61,37 @@ void process_data_wifi(void)
 {
 		if (strstr(input_line_wifi, "Start transfer")){                 // string provided from the firmware design pdf
 			image_transfer_flag = true;
+			wifi_status = true;
 		}
 		
 		if (strstr(input_line_wifi, "None"))
 		{
+			wifi_websocket_flag = false;		
+		}
+		
+		if (strstr(input_line_wifi, "Client not connected")) 
+		{
 			wifi_websocket_flag = false;
 		}
 		
-		if (strstr(input_line_wifi, "Websocket connected"))             // not necessarily required
+		if (strstr(input_line_wifi, "Websocket connected"))            
 		{
 			wifi_websocket_flag = true;
+		}
+		
+		if (strstr(input_line_wifi, "Websocket disconnected"))  
+		{
+			wifi_websocket_flag = false;
+		}
+		
+		if (strstr(input_line_wifi, ","))             // not necessarily required
+		{
+			wifi_websocket_flag = true;
+		}
+		
+		if (strstr(input_line_wifi, "2"))
+		{
+			wifi_status = true;
 		}
 }
 
@@ -92,7 +114,6 @@ void configure_usart_wifi(void)
 	gpio_configure_pin(PIN_USART0_RXD_IDX, PIN_USART0_RXD_FLAGS);
 	gpio_configure_pin(PIN_USART0_TXD_IDX, PIN_USART0_TXD_FLAGS);
 	gpio_configure_pin(PIN_USART0_CTS_IDX, PIN_USART0_CTS_FLAGS);
-	//gpio_configure_pin(PIN_USART0_RTS_IDX, PIN_USART0_RTS_FLAGS);
 	
 	static uint32_t ul_sysclk;
 	const sam_usart_opt_t usart_console_settings = {
@@ -185,14 +206,11 @@ void write_wifi_command(char* comm, uint8_t cnt)
 		
 
 
-
-
-
 // Writes an image from SAM4s8B to the AMW136. If the length of the image is zero (i.e.. the image is not valid), return. Otherwise, follow the protocol
 void write_image_to_file(void)
 {
-	uint8_t image_available = find_image_len();
-	uint32_t img_length = end_point - start_point;
+	image_available = find_image_len();
+	img_length = end_point - start_point;
 	
 	if (image_available == 0) {
 		return;
@@ -214,78 +232,3 @@ void write_image_to_file(void)
 	}		
 	
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//void write_image_to_file(void) {
-	//if (!find_image_len()) {
-		//return;
-	//}
-	//else {
-		//char string[100] = {0};
-		//sprintf(string,"image_transfer %d\r\n",img_length);
-		//write_wifi_command(string, 2);
-		//counts = 0;
-		//bool timeout_var = false;
-		//while (!ready_to_transfer_flag) {
-			//if (counts > 3) {
-				//timeout_var = true;
-				//break;
-			//}
-		//}
-		//if (!timeout_var) {
-			//for (int ii = start_count; ii <= stop_count + 1=
-			//; ii++) {
-				//usart_putchar(WIFI_USART, img_buf[ii]);
-			//}
-			//ready_to_transfer_flag = false;
-			//delay_ms(50);
-		//}
-	//}
-		//
-//}
-
-
-
-
-//void process_data_wifi()
-//{
-	//if (strstr(input_line_wifi, "2") && network_check) {
-		//wifi_connected_flag = true;
-		//network_check = false;
-	//}
-	//if (strstr(input_line_wifi, "Start transfer")) {
-		//ready_to_transfer_flag = true;
-	//}
-	//if (strstr(input_line_wifi, ",") || strstr(input_line_wifi, "Websocket connected")) {
-		//websocket_open_flag = true;
-	//}
-	//if (strstr(input_line_wifi, "None")) {
-		//websocket_open_flag = false;
-	//}
-	//if (strstr(input_line_wifi, "Client not connected")) {
-		//websocket_open_flag = false;
-	//}
-//}

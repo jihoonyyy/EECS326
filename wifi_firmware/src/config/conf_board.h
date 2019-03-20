@@ -17,7 +17,12 @@
 #define BOARD_FREQ_MAINCK_BYPASS  (12000000U)
 #define BOARD_MCK                 CHIP_FREQ_CPU_MAX
 #define BOARD_OSC_STARTUP_US      15625
-
+//
+///** Configure TWI0 pins (for OV7740  communications). */
+//#define CONF_BOARD_TWI0
+//
+///** Configure PCK0 pins (for OV7740  communications). */
+//#define CONF_BOARD_PCK1
 
 /** TWI0 pins */
 #define ID_BOARD_TWI		               ID_TWI0
@@ -36,9 +41,9 @@
 
 
 
-
+#define WIFI_STATUS_PIN		PIO_PB2_IDX
 #define OV2640_RESET_PIN    PIO_PA20_IDX
-#define WIFI_CTS_PIN		PIO_PA8_IDX
+#define WIFI_CTS_PIN		PIO_PA7_IDX
 #define WIFI_RESET_PIN      PIO_PB3_IDX
 #define WIFI_WEB_SETUP_PIN  PIO_PB4_IDX          // Used PB4 for setup pin
 #define WIFI_COMM_PIN		PIO_PB10_IDX

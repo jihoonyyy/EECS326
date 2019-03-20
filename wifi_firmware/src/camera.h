@@ -28,13 +28,15 @@
 
 
 /** TWI0 data pin */
-#define PIN_TWI_TWD0                   {PIO_PA3A_TWD0, PIOA, ID_PIOA, \
-PIO_PERIPH_A, PIO_DEFAULT}
+#define PIN_TWI_TWD0                   {PIO_PA3A_TWD0, PIOA, ID_PIOA, PIO_PERIPH_A, PIO_DEFAULT}
 
 /** TWI0 clock pin */
-#define PIN_TWI_TWCK0                  {PIO_PA4A_TWCK0, PIOA, ID_PIOA,	\
-PIO_PERIPH_A, PIO_DEFAULT}
+#define PIN_TWI_TWCK0                  {PIO_PA4A_TWCK0, PIOA, ID_PIOA, PIO_PERIPH_A, PIO_DEFAULT}
 
+
+
+/** TWI0 pins */
+#define PINS_TWI0                      PIN_TWI_TWD0, PIN_TWI_TWCK0
 
 /** TWI0 pins */
 #define ID_BOARD_TWI		               ID_TWI0
@@ -85,22 +87,12 @@ PIO_PERIPH_A, PIO_DEFAULT}
 
 
 
-/* Image sensor board defines. */
-// Image sensor Power pin.             Make sure we change these pins for our own configuration!!!!!!!!!
-#define OV_POWER_PIO                   PIOC       //  OV_SW_OVT_PIO
-#define OV_POWER_MASK                  PIO_PC10   //  OV_SW_OVT_MASK
-
-
 
 /** HSYNC pin */
-#define PIN_OV_HSYNC                   { PIO_PA16, PIOA, ID_PIOA, \
-	PIO_INPUT, PIO_PULLUP | \
-PIO_IT_RISE_EDGE }
+#define PIN_OV_HSYNC                   { PIO_PA16, PIOA, ID_PIOA, PIO_INPUT, PIO_PULLUP | PIO_IT_RISE_EDGE }
 
 /** VSYNC pin */
-#define PIN_OV_VSYNC                   { PIO_PA15, PIOA, ID_PIOA, \
-	PIO_INPUT, PIO_PULLUP | \
-PIO_IT_RISE_EDGE }
+#define PIN_OV_VSYNC                   { PIO_PA15, PIOA, ID_PIOA, PIO_INPUT, PIO_PULLUP | PIO_IT_RISE_EDGE }
 
 
 // OV VSYNC pin configuration
@@ -109,7 +101,7 @@ PIO_IT_RISE_EDGE }
 #define VSYNC_MASK					PIO_PA15    
 #define VSYNC_TYPE					PIO_PULLUP   
 #define VSYNC_GPIO					PIO_PA15_IDX
-#define VSYNC_FLAGS					(PIO_PULLUP	| PIO_PERIPH_A)
+#define VSYNC_FLAGS					(PIO_PULLUP	| PIO_IT_RISE_EDGE)
 
 
 // OV HSYNC pin configuration
@@ -118,12 +110,11 @@ PIO_IT_RISE_EDGE }
 #define HSYNC_MASK					PIO_PA16
 #define HSYNC_TYPE					PIO_PULLUP
 #define HSYNC_GPIO					PIO_PA16_IDX
-#define HSYNC_FLAGS					(PIO_PULLUP	| PIO_PERIPH_A)
+#define HSYNC_FLAGS					(PIO_PULLUP	| PIO_IT_RISE_EDGE)
 
 
 
-#define PIN_OV_RST                     { PIO_PA20, PIOA, ID_PIOA, \
-PIO_OUTPUT_1, PIO_DEFAULT}
+#define PIN_OV_RST                     { PIO_PA20, PIOA, ID_PIOA, PIO_OUTPUT_1, PIO_DEFAULT}
 
 // OV RESET pin configuration
 #define OV_RST_PIO                     PIOA
@@ -139,18 +130,18 @@ PIO_OUTPUT_1, PIO_DEFAULT}
 
 #define MAX_BUFFER					100000
 volatile uint32_t g_ul_vsync_flag;    /* Vsync signal information (true if it's triggered and false otherwise) */
-volatile uint32_t start_point;
-volatile uint32_t end_point;
+uint32_t start_point;
+uint32_t end_point;
 
 
-volatile char image_buffer[MAX_BUFFER]
+volatile char image_buffer[MAX_BUFFER];
 
 
 
 void vsync_handler(uint32_t ul_id, uint32_t ul_mask);                           // brief Handler for vertical synchronization using by the OV7740 image sensor.
 void init_vsync_interrupts(void);												// brief Initialize Vsync_Handler.
 void configure_twi(void);														// configuration of TWI (two ;wire interface)
-void pio_capture_init(Pio *p_pio, uint32_t ul_id)								// brief Initialize PIO capture for the OV7740 image sensor communication.
+void pio_capture_init(Pio *p_pio, uint32_t ul_id);								// brief Initialize PIO capture for the OV7740 image sensor communication.
 uint8_t pio_capture_to_buffer(Pio *p_pio, uint8_t *uc_buf, uint32_t ul_size);   // brief Capture OV7740 data to a buffer.
 void init_camera(void);															// Configuration of camera pins, camera clock (XCLK), and calling the configure_twi function
 void configure_camera(void);													// Configuration of OV2640 registers for desired operation

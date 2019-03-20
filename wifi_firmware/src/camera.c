@@ -9,6 +9,7 @@
 #include "asf.h"
 #include "conf_board.h"
 #include "camera.h"
+#include "ov2640.h"
 
 volatile uint32_t g_ul_vsync_flag = false;
 
@@ -19,7 +20,7 @@ void vsync_handler(uint32_t ul_id, uint32_t ul_mask)
 	unused(ul_id);
 	unused(ul_mask);
 
-	g_ul_vsync_flag = true;
+	g_ul_vsync_flag = 1;
 }
 
 
@@ -34,8 +35,9 @@ void init_vsync_interrupts(void)
 
 	/* Enable PIO controller IRQs */
 	NVIC_EnableIRQ((IRQn_Type)OV2640_VSYNC_ID);
-
 	
+	// necessary?
+	// pio_enable_interrupt(OV2640_VSYNC_PIO, OV2640_VSYNC_MASK);
 }
 
 
@@ -43,9 +45,7 @@ void configure_twi(void)
 {
 	
 	twi_options_t opt;
-	
-	gpio_configure_pin(TWI0_CLK_GPIO, TWI0_CLK_FLAGS);				// configure TWI clock
-	gpio_configure_pin(TWI0_DATA_GPIO, TWI0_DATA_FLAGS);			// configure TWI data pin
+
 	
 	/* Enable TWI peripheral */
 	pmc_enable_periph_clk(ID_BOARD_TWI);
@@ -123,37 +123,41 @@ uint8_t pio_capture_to_buffer(Pio *p_pio, uint8_t *uc_buf, uint32_t ul_size)
 
 void init_camera(void)
 {
+	
+	//// configure reset
+	//gpio_configure_pin(OV_RST_GPIO, OV_RST_FLAGS);
+	//
+		//
+	//// configure HSYNC and VSYNC
+	//gpio_configure_pin(HSYNC_GPIO, HSYNC_FLAGS);
+	//gpio_configure_pin(VSYNC_GPIO, VSYNC_FLAGS);
+	//
+	//// configure DATA pins
+	//gpio_configure_pin(OV_DATA_BUS_D0, OV_DATA_BUS_FLAGS);
+	//gpio_configure_pin(OV_DATA_BUS_D1, OV_DATA_BUS_FLAGS);
+	//gpio_configure_pin(OV_DATA_BUS_D2, OV_DATA_BUS_FLAGS);
+	//gpio_configure_pin(OV_DATA_BUS_D3, OV_DATA_BUS_FLAGS);
+	//gpio_configure_pin(OV_DATA_BUS_D4, OV_DATA_BUS_FLAGS);
+	//gpio_configure_pin(OV_DATA_BUS_D5, OV_DATA_BUS_FLAGS);
+	//gpio_configure_pin(OV_DATA_BUS_D6, OV_DATA_BUS_FLAGS);
+	//gpio_configure_pin(OV_DATA_BUS_D7, OV_DATA_BUS_FLAGS);
+	
+	
+	
+	pmc_enable_pllbck(7, 0x1, 1); /* PLLA work at 96 Mhz */
 	// configure clock pins
-	gpio_configure_pin(PIN_PCK1, PIN_PCK1_FLAGS);
-		
-	// configure HSYNC and VSYNC
-	gpio_configure_pin(HSYNC_GPIO, HSYNC_FLAGS);
-	gpio_configure_pin(VSYNC_GPIO, VSYNC_FLAGS);
-	
-	// configure DATA pins
-	gpio_configure_pin(OV_DATA_BUS_D0, OV_DATA_BUS_FLAGS);
-	gpio_configure_pin(OV_DATA_BUS_D1, OV_DATA_BUS_FLAGS);
-	gpio_configure_pin(OV_DATA_BUS_D2, OV_DATA_BUS_FLAGS);
-	gpio_configure_pin(OV_DATA_BUS_D3, OV_DATA_BUS_FLAGS);
-	gpio_configure_pin(OV_DATA_BUS_D4, OV_DATA_BUS_FLAGS);
-	gpio_configure_pin(OV_DATA_BUS_D5, OV_DATA_BUS_FLAGS);
-	gpio_configure_pin(OV_DATA_BUS_D6, OV_DATA_BUS_FLAGS);
-	gpio_configure_pin(OV_DATA_BUS_D7, OV_DATA_BUS_FLAGS);
-	
-	
-	
-	pmc_enable_pllack(7, 0x1, 1); /* PLLA work at 96 Mhz */
 	
 	
 	/* Init Vsync handler*/
 	init_vsync_interrupts();
-	g_ul_vsync_flag = false;	// reset the flag
+	//	pio_disable_interrupt(VSYNC_PIO, VSYNC_MASK);    // try???
+	g_ul_vsync_flag = 0;	// reset the flag
 	
 	/* Init PIO capture*/
 	pio_capture_init(OV_DATA_BUS_PIO, OV_DATA_BUS_ID);
 
-	/* Turn on ov7740 image sensor using power pin */
-	ov_power(true, OV_POWER_PIO, OV_POWER_MASK);
+	///* Turn on ov7740 image sensor using power pin */
+	//ov_power(true, OV_POWER_PIO, OV_POWER_MASK);
 
 	/* Init PCK0 to work at 24 Mhz */
 	/* 96/4=24 Mhz */
@@ -204,6 +208,7 @@ uint8_t start_capture(void)
 	/* Disable vsync interrupt*/
 	pio_disable_interrupt(OV2640_VSYNC_PIO, OV2640_VSYNC_MASK);
 
+	
 	/* Enable pio capture*/
 	pio_capture_enable(OV2640_DATA_BUS_PIO);
 
@@ -218,10 +223,10 @@ uint8_t start_capture(void)
 	}
 
 	/* Disable pio capture*/
-	pio_capture_disable(OV2640_DATA_BUS_PIO);
+	pio_capture_disable(OV2640_DATA_BUS_PIO);					
 
 	/* Reset vsync flag*/
-	g_ul_vsync_flag = false;
+	g_ul_vsync_flag = 0;
 	
 	uint8_t img_len = find_image_len();
 	return img_len;

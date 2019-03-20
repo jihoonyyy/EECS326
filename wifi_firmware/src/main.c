@@ -29,11 +29,12 @@
  * Support and FAQ: visit <a href="https://www.microchip.com/support/">Microchip Support</a>
  */
 #include <asf.h>
+#include <string.h>
 #include "wifi.h"
 #include "camera.h"
 #include "conf_board.h"
 #include "conf_clock.h"
-#include "conf_uart_serial.h"
+
 #include "timer_interface.h"
 
 
@@ -43,8 +44,13 @@ int main (void)
 	/* Insert system clock initialization code here (sysclk_init()). */
 
 	sysclk_init();
-	wdt_disable();
+	wdt_disable(WDT);
 	board_init();
+	
+	
+	web_setup_flag = false;
+	
+	
 	
 	configure_tc();						// Configuring the timer from timer_interface
 	
@@ -56,18 +62,27 @@ int main (void)
 	gpio_set_pin_low(WIFI_RESET_PIN);   // Pulling the pin low, hard resetting
 	delay_ms(100);                      // Delaying for 100 ms, as instructed
 	gpio_set_pin_high(WIFI_RESET_PIN);  // Pulling the pin high
-	
-	
+
 	// Wait for the WIFI to connect to a network. Listen for the Web Setup Pin
-	while(ioport_get_pin_level(WIFI_WEB_SETUP_PIN) == 0)
-	{
+// 	while(ioport_get_pin_level(WIFI_WEB_SETUP_PIN) == 0)
+// 	{
+// 		if (web_setup_flag == true)
+// 		{
+// 			usart_write_line(WIFI_USART, "Setting up web\r\n");
+// 			web_setup_flag = false;
+// 		}
+// 		
+// 	}
+
+	while(!ioport_get_pin_level(WIFI_STATUS_PIN)) {
 		if (web_setup_flag == true)
 		{
-			usart_write_line(WIFI_USART, "Setting up web\r\n");
+			usart_write_line(WIFI_USART, "setup web\r\n");
 			web_setup_flag = false;
 		}
-		
 	}
+	
+
 	
 	// Initialize the camera
 	init_camera();
@@ -75,40 +90,45 @@ int main (void)
 	
 	// Configure the camera
 	configure_camera();
-	
-	usart_write_line(WIFI_USART, "set sy c p off\r\n");					// Telling the wifi chip to turn off the command prompt
-	usart_write_line(WIFI_USART, "set sy c e off\r\n");					// Telling the wifi chip to turn off the echo
+
+	write_wifi_command("set sy c p off\r\n", 3);					// Telling the wifi chip to turn off the command prompt
+	write_wifi_command("set sy c e off\r\n", 3);					// Telling the wifi chip to turn off the echo
 	
 	
 	
 	while(1)
 	{
-		if (web_setup_flag) {											// Check for Web Setup Request, and goes through this "if" if flag is up
-			usart_write_line(WIFI_USART, "Setting up web\r\n");
-			web_setup_flag = false;			
-			}
-			
-		else {															// wifi setup flag is false, so check if network is connected
-			if (ioport_get_pin_level(WIFI_WEB_SETUP_PIN) == 1) {		// if connected*
-				if (!wifi_websocket_flag)					
-				{
-					delay_ms(1000);							// if not, delay 1s and start over
-				}
-	
-				else										// if there is an open stream
-				{
-						start_capture();					// capturing
-						write_image_to_file();				// transferring it to AMW136
-				}
-			}
-			
-			else {
-				gpio_set_pin_low(WIFI_RESET_PIN);   // Pulling the pin low, hard resetting
-				delay_ms(100);                      // Delaying for 100 ms, as instructed
-				gpio_set_pin_high(WIFI_RESET_PIN);  // Pulling the pin high
+		if (web_setup_flag) {
+			write_wifi_command("setup web\r\n", 3);
+			web_setup_flag = false;
+			while (!ioport_get_pin_level(WIFI_STATUS_PIN)) {
 			}
 		}
+		
+		else {
+			if (wifi_status == false) {
+ 				gpio_set_pin_low(WIFI_RESET_PIN);   // Pulling the pin low, hard resetting
+ 				delay_ms(100);                      // Delaying for 100 ms, as instructed
+ 				gpio_set_pin_high(WIFI_RESET_PIN);  // Pulling the pin high
+				while (!wifi_status) {
+					write_wifi_command("get wl n s\r\n",2);
+				}
+			}
+			else 
+			{
+				if (wifi_websocket_flag == false)
+				{
+					write_wifi_command("poll all\r\n",3);
+					delay_ms(1000);
+				}
+				else
+				{
+					start_capture();
+					write_image_to_file();
+				}
+			}
+			
+		}
 	}
-	
-	
 }
+	

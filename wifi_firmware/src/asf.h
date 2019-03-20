@@ -74,6 +74,9 @@
 // From module: Interrupt management - SAM implementation
 #include <interrupt.h>
 
+// From module: PDC - Peripheral DMA Controller Example
+#include <pdc.h>
+
 // From module: PIO - Parallel Input/Output Controller
 #include <pio.h>
 
@@ -84,8 +87,20 @@
 // From module: Part identification macros
 #include <parts.h>
 
+// From module: Standard serial I/O (stdio) - SAM implementation
+#include <stdio_serial.h>
+
 // From module: System Clock Control - SAM4S implementation
 #include <sysclk.h>
+
+// From module: TC - Timer Counter
+#include <tc.h>
+
+// From module: TWI - Two-Wire Interface - SAM implementation
+#include <sam_twi/twi_master.h>
+#include <sam_twi/twi_slave.h>
+#include <twi_master.h>
+#include <twi_slave.h>
 
 // From module: TWI - Two-wire Interface
 #include <twi.h>
