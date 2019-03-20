@@ -63,16 +63,6 @@ int main (void)
 	delay_ms(100);                      // Delaying for 100 ms, as instructed
 	gpio_set_pin_high(WIFI_RESET_PIN);  // Pulling the pin high
 
-	// Wait for the WIFI to connect to a network. Listen for the Web Setup Pin
-// 	while(ioport_get_pin_level(WIFI_WEB_SETUP_PIN) == 0)
-// 	{
-// 		if (web_setup_flag == true)
-// 		{
-// 			usart_write_line(WIFI_USART, "Setting up web\r\n");
-// 			web_setup_flag = false;
-// 		}
-// 		
-// 	}
 
 	while(!ioport_get_pin_level(WIFI_STATUS_PIN)) {
 		if (web_setup_flag == true)
