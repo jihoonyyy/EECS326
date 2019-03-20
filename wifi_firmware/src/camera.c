@@ -9,9 +9,9 @@
 #include "asf.h"
 #include "conf_board.h"
 #include "camera.h"
+#include "ov2640.h"
 
 volatile uint32_t g_ul_vsync_flag = false;
-
 
 
 // brief Handler for vertical synchronization using by the OV7740 image sensor.
@@ -20,7 +20,7 @@ void vsync_handler(uint32_t ul_id, uint32_t ul_mask)
 	unused(ul_id);
 	unused(ul_mask);
 
-	g_ul_vsync_flag = true;
+	g_ul_vsync_flag = 1;
 }
 
 
@@ -30,13 +30,14 @@ void init_vsync_interrupts(void)
 {
 	/* Initialize PIO interrupt handler, see PIO definition in conf_board.h
 	**/
-	pio_handler_set(OV7740_VSYNC_PIO, OV7740_VSYNC_ID, OV7740_VSYNC_MASK,
-			OV7740_VSYNC_TYPE, vsync_handler);
+	pio_handler_set(OV2640_VSYNC_PIO, OV2640_VSYNC_ID, OV2640_VSYNC_MASK,
+			OV2640_VSYNC_TYPE, vsync_handler);
 
 	/* Enable PIO controller IRQs */
-	NVIC_EnableIRQ((IRQn_Type)OV7740_VSYNC_ID);
-
-	// pio_enable_interrupt(OV2640_VSYNC_PIO, OV2640_VSYNC_MASK)
+	NVIC_EnableIRQ((IRQn_Type)OV2640_VSYNC_ID);
+	
+	// necessary?
+	// pio_enable_interrupt(OV2640_VSYNC_PIO, OV2640_VSYNC_MASK);
 }
 
 
@@ -44,6 +45,7 @@ void configure_twi(void)
 {
 	
 	twi_options_t opt;
+
 	
 	/* Enable TWI peripheral */
 	pmc_enable_periph_clk(ID_BOARD_TWI);
@@ -90,12 +92,6 @@ void pio_capture_init(Pio *p_pio, uint32_t ul_id)
 	p_pio->PIO_PCMR &= ~((uint32_t)PIO_PCMR_ALWYS);
 	p_pio->PIO_PCMR &= ~((uint32_t)PIO_PCMR_HALFS);
 
-// might not need this since we are in JPEG
-	#if !defined(DEFAULT_MODE_COLORED)
-	/* Samples only data with even index */
-	p_pio->PIO_PCMR |= PIO_PCMR_HALFS;
-	p_pio->PIO_PCMR &= ~((uint32_t)PIO_PCMR_FRSTS);
-	#endif
 }
 
 
@@ -106,16 +102,16 @@ void pio_capture_init(Pio *p_pio, uint32_t ul_id)
  * \param p_uc_buf Buffer address where captured data must be stored.
  * \param ul_size Data frame size.
  */
-uint8_t pio_capture_to_buffer(Pio *p_pio, uint8_t *uc_buf, uint32_t ul_size)      //Make sure you’re careful about the buffer size though. The copy is not necessarily by a byte at a time like your buffer is. 
+uint8_t pio_capture_to_buffer(Pio *p_pio, uint8_t *uc_buf, uint32_t ul_size)     
 {
 	/* Check if the first PDC bank is free */
 	if ((p_pio->PIO_RCR == 0) && (p_pio->PIO_RNCR == 0)) {
-		p_pio->PIO_RPR = (uint32_t)uc_buf / 8;
+		p_pio->PIO_RPR = (uint32_t)uc_buf;
 		p_pio->PIO_RCR = ul_size;
 		p_pio->PIO_PTCR = PIO_PTCR_RXTEN;
 		return 1;
 		} else if (p_pio->PIO_RNCR == 0) {
-		p_pio->PIO_RNPR = (uint32_t)uc_buf / 8;
+		p_pio->PIO_RNPR = (uint32_t)uc_buf;
 		p_pio->PIO_RNCR = ul_size;
 		return 1;
 		} else {
@@ -127,20 +123,47 @@ uint8_t pio_capture_to_buffer(Pio *p_pio, uint8_t *uc_buf, uint32_t ul_size)    
 
 void init_camera(void)
 {
+	
+	//// configure reset
+	//gpio_configure_pin(OV_RST_GPIO, OV_RST_FLAGS);
+	//
+		//
+	//// configure HSYNC and VSYNC
+	//gpio_configure_pin(HSYNC_GPIO, HSYNC_FLAGS);
+	//gpio_configure_pin(VSYNC_GPIO, VSYNC_FLAGS);
+	//
+	//// configure DATA pins
+	//gpio_configure_pin(OV_DATA_BUS_D0, OV_DATA_BUS_FLAGS);
+	//gpio_configure_pin(OV_DATA_BUS_D1, OV_DATA_BUS_FLAGS);
+	//gpio_configure_pin(OV_DATA_BUS_D2, OV_DATA_BUS_FLAGS);
+	//gpio_configure_pin(OV_DATA_BUS_D3, OV_DATA_BUS_FLAGS);
+	//gpio_configure_pin(OV_DATA_BUS_D4, OV_DATA_BUS_FLAGS);
+	//gpio_configure_pin(OV_DATA_BUS_D5, OV_DATA_BUS_FLAGS);
+	//gpio_configure_pin(OV_DATA_BUS_D6, OV_DATA_BUS_FLAGS);
+	//gpio_configure_pin(OV_DATA_BUS_D7, OV_DATA_BUS_FLAGS);
+	
+	
+	
+	pmc_enable_pllbck(7, 0x1, 1); /* PLLA work at 96 Mhz */
+	// configure clock pins
+	
+	
 	/* Init Vsync handler*/
 	init_vsync_interrupts();
-
+	//	pio_disable_interrupt(VSYNC_PIO, VSYNC_MASK);    // try???
+	g_ul_vsync_flag = 0;	// reset the flag
+	
 	/* Init PIO capture*/
 	pio_capture_init(OV_DATA_BUS_PIO, OV_DATA_BUS_ID);
 
-	/* Turn on ov7740 image sensor using power pin */
-	ov_power(true, OV_POWER_PIO, OV_POWER_MASK);
+	///* Turn on ov7740 image sensor using power pin */
+	//ov_power(true, OV_POWER_PIO, OV_POWER_MASK);
 
 	/* Init PCK0 to work at 24 Mhz */
 	/* 96/4=24 Mhz */
-	PMC->PMC_PCK[0] = (PMC_PCK_PRES_CLK_4 | PMC_PCK_CSS_PLLA_CLK);
-	PMC->PMC_SCER = PMC_SCER_PCK0;
-	while (!(PMC->PMC_SCSR & PMC_SCSR_PCK0)) {
+	PMC->PMC_PCK[1] = (PMC_PCK_PRES_CLK_4 | PMC_PCK_CSS_PLLB_CLK);				// changed from 0 to 1 since we are using PCK1, for address info, refer to page 529 of MCU data sheet
+	PMC->PMC_SCER = PMC_SCER_PCK1;												// changed from 0 to 1 since we are using PCK1
+	while (!(PMC->PMC_SCSR & PMC_SCSR_PCK1)) {									// changed from 0 to 1 since we are using PCK1
 	}
 	
 	
@@ -159,7 +182,10 @@ void configure_camera(void)
 	}
 
 	/* ov7740 configuration */
-	ov_configure(BOARD_TWI, QVGA_YUV422_20FPS);
+	ov_configure(BOARD_TWI, JPEG_INIT);
+	ov_configure(BOARD_TWI, YUV422);
+	ov_configure(BOARD_TWI, JPEG);
+	ov_configure(BOARD_TWI, JPEG_640x480);
 	
 }
 
@@ -169,14 +195,9 @@ void configure_camera(void)
 
 uint8_t start_capture(void)
 {
-	/* Set capturing destination address*/
-	g_p_uc_cap_dest_buf = (uint8_t *)CAP_DEST;
-
-	/* Set cap_rows value*/
-	g_us_cap_rows = IMAGE_HEIGHT;
 
 	/* Enable vsync interrupt*/
-	pio_enable_interrupt(OV7740_VSYNC_PIO, OV7740_VSYNC_MASK);
+	pio_enable_interrupt(OV2640_VSYNC_PIO, OV2640_VSYNC_MASK);
 
 	/* Capture acquisition will start on rising edge of Vsync signal.
 	 * So wait g_vsync_flag = 1 before start process
@@ -185,36 +206,65 @@ uint8_t start_capture(void)
 	}
 
 	/* Disable vsync interrupt*/
-	pio_disable_interrupt(OV7740_VSYNC_PIO, OV7740_VSYNC_MASK);
+	pio_disable_interrupt(OV2640_VSYNC_PIO, OV2640_VSYNC_MASK);
 
+	
 	/* Enable pio capture*/
-	pio_capture_enable(OV7740_DATA_BUS_PIO);
+	pio_capture_enable(OV2640_DATA_BUS_PIO);
 
+	
 	/* Capture data and send it to external SRAM memory thanks to PDC
 	 * feature */
-	pio_capture_to_buffer(OV7740_DATA_BUS_PIO, g_p_uc_cap_dest_buf,
-			(g_us_cap_line * g_us_cap_rows) >> 2);
-
+	pio_capture_to_buffer(OV2640_DATA_BUS_PIO, image_buffer, 25000);
+	
 	/* Wait end of capture*/
-	while (!((OV7740_DATA_BUS_PIO->PIO_PCISR & PIO_PCIMR_RXBUFF) ==
+	while (!((OV2640_DATA_BUS_PIO->PIO_PCISR & PIO_PCIMR_RXBUFF) ==
 			PIO_PCIMR_RXBUFF)) {
 	}
 
 	/* Disable pio capture*/
-	pio_capture_disable(OV7740_DATA_BUS_PIO);
+	pio_capture_disable(OV2640_DATA_BUS_PIO);					
 
 	/* Reset vsync flag*/
-	g_ul_vsync_flag = false;	
+	g_ul_vsync_flag = 0;
 	
+	uint8_t img_len = find_image_len();
+	return img_len;
 }
 
 
 
-uint8_t find_image_len(void)
+
+
+
+uint8_t find_image_len (void)
 {
-
-
+	start_point = 0;
+	end_point = 0;
+	bool no_error_flag = false;																					// This flag is used for checking error
+	
+	for (uint32_t i = 0; i+1 < sizeof(image_buffer); i++)
+	{
+		if (image_buffer[i] == 0xff && image_buffer[i + 1] == 0xd8)												// Checking for initial value for JPEG
+		{
+			start_point = i;
+			no_error_flag = true;																				// we've detected initial value for JPEG
+		}
+		
+		if (image_buffer[i] == 0xff && image_buffer[i + 1] == 0xd9 && no_error_flag == true) {
+			end_point = i+2;
+			return 1;
+		}
+		
+	}
+	
+	
+	// reset everything if not proper
+	start_point = 0;																						
+	end_point = 0;
+	return 0;
 }
+
 
 
 

@@ -52,26 +52,34 @@
 
 
 // Pin setups, these should be changed depending on our setting
-#define WIFI_COMM_PIN_NUM			PIO_PB10    //PIO_PB2
+#define WIFI_COMM_PIN_NUM			PIO_PB10
 #define WIFI_COMM_PIO				PIOB
 #define WIFI_COMM_ID				ID_PIOB
-#define WIFI_COMM_ATTR				PIO_IT_RISE_EDGE                // Consider 'or'ing with PIO_PULLUP, since it migth need pullup
+#define WIFI_COMM_ATTR				PIO_PULLUP | PIO_IT_RISE_EDGE                
 
 
 // Pin setups for wifi setup, can be changed depending on our setting
 #define WIFI_SETUP_PIN_NUM			PIO_PB4
 #define WIFI_SETUP_PIO				PIOB
 #define WIFI_SETUP_ID				ID_PIOB
-#define WIFI_SETUP_ATTR				PIO_IT_RISE_EDGE
+#define WIFI_SETUP_ATTR				PIO_PULLUP | PIO_IT_RISE_EDGE
+#define WIFI_SETUP_PIN				PIO_PB4_IDX
+
+#define MAX_INPUT_WIFI				1000
 
 
-#define MAX_INPUT_WIFI 10000;
+
 volatile uint32_t received_byte_wifi;
 volatile uint32_t input_pos_wifi;
 volatile bool wifi_comm_success;
 volatile bool new_rx_wifi;
 volatile char input_line_wifi[MAX_INPUT_WIFI];    // giving 10000 bytes so that buffer doesn't run over easily
 volatile uint32_t web_setup_flag;
+volatile bool image_transfer_flag;
+volatile bool wifi_websocket_flag;
+volatile bool wifi_status;
+uint8_t image_available;
+uint32_t img_length;
 
 
 // void wifi_usart_handler(void);
@@ -79,6 +87,7 @@ void process_incoming_byte_wifi(uint8_t in_byte);
 void wifi_command_response_handler(uint32_t ul_id, uint32_t ul_mask);
 void process_data_wifi(void);
 void wifi_web_setup_handler(uint32_t ul_id, uint32_t ul_mask);
+void configure_usart_wifi(void);
 void configure_wifi_comm_pin(void);
 void configure_wifi_web_setup_pin(void);
 void write_wifi_command(char* comm, uint8_t cnt);
