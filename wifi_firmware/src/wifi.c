@@ -84,7 +84,7 @@ void process_data_wifi(void)
 			wifi_websocket_flag = false;
 		}
 		
-		if (strstr(input_line_wifi, ","))             // not necessarily required
+		if (strstr(input_line_wifi, ","))             
 		{
 			wifi_websocket_flag = true;
 		}
@@ -175,6 +175,9 @@ void configure_wifi_web_setup_pin(void)
 	/* Configure PIO clock. */
 	pmc_enable_periph_clk(WIFI_SETUP_ID);
 
+// 		/* Adjust PIO debounce filter using a 10 Hz filter. */
+	pio_set_debounce_filter(WIFI_SETUP_PIO, WIFI_SETUP_PIN, 10);     // give a shot
+// 	
 	/* Initialize PIO interrupt handler, see PIO definition in conf_board.h
 	**/
 	pio_handler_set(WIFI_SETUP_PIO, WIFI_SETUP_ID, WIFI_SETUP_PIN_NUM, WIFI_SETUP_ATTR, wifi_web_setup_handler);
@@ -184,6 +187,8 @@ void configure_wifi_web_setup_pin(void)
 
 	/* Enable PIO interrupt lines. */
 	pio_enable_interrupt(WIFI_SETUP_PIO, WIFI_SETUP_PIN_NUM);
+	
+	write_wifi_command("web setup mode initiated\r\n", 3);
 	
 }
 
