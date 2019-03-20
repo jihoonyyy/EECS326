@@ -59,11 +59,11 @@
 
 
 // Pin setups for wifi setup, can be changed depending on our setting
-#define WIFI_SETUP_PIN_NUM			PIO_PB4
+#define WIFI_SETUP_PIN_NUM			PIO_PB1
 #define WIFI_SETUP_PIO				PIOB
 #define WIFI_SETUP_ID				ID_PIOB
-#define WIFI_SETUP_ATTR				PIO_PULLUP | PIO_IT_RISE_EDGE
-#define WIFI_SETUP_PIN				PIO_PB4_IDX
+#define WIFI_SETUP_ATTR				PIO_DEBOUNCE | PIO_IT_FALL_EDGE | PIO_PULLUP
+#define WIFI_SETUP_PIN				PIO_PB1_IDX
 
 #define MAX_INPUT_WIFI				1000
 

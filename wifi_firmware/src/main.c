@@ -47,10 +47,11 @@ int main (void)
 	wdt_disable(WDT);
 	board_init();
 	
-	
+	wifi_status = false;
+	wifi_websocket_flag = false;
+	wifi_comm_success = false;
+	image_transfer_flag = false;
 	web_setup_flag = false;
-	
-	
 	
 	configure_tc();						// Configuring the timer from timer_interface
 	
@@ -81,10 +82,11 @@ int main (void)
 	// Configure the camera
 	configure_camera();
 
-	write_wifi_command("set sy c p off\r\n", 3);					// Telling the wifi chip to turn off the command prompt
-	write_wifi_command("set sy c e off\r\n", 3);					// Telling the wifi chip to turn off the echo
+// 	write_wifi_command("set sy c p off\r\n", 3);					// Telling the wifi chip to turn off the command prompt
+// 	write_wifi_command("set sy c e off\r\n", 3);					// Telling the wifi chip to turn off the echo
 	
-	
+		write_wifi_command("set sy c p on\r\n", 3);					// Telling the wifi chip to turn off the command prompt
+		write_wifi_command("set sy c e on\r\n", 3);					// Telling the wifi chip to turn off the echo
 	
 	while(1)
 	{
