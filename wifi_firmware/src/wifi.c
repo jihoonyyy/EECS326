@@ -59,38 +59,32 @@ void wifi_command_response_handler(uint32_t ul_id, uint32_t ul_mask)						// id 
 // Processes the response of the AMW136, which should be stored in the buffer filled by process_incoming_byte_wifi. Looking for certain responses that the AMW136 gives
 void process_data_wifi(void)
 {
-		if (strstr(input_line_wifi, "Start transfer")){                 // string provided from the firmware design pdf
+		if (strstr(input_line_wifi, "Start transfer")) {                
 			image_transfer_flag = true;
 			wifi_status = true;
 		}
 		
-		if (strstr(input_line_wifi, "None"))
-		{
+		if (strstr(input_line_wifi, "None")) {
 			wifi_websocket_flag = false;		
 		}
 		
-		if (strstr(input_line_wifi, "Client not connected")) 
-		{
+		if (strstr(input_line_wifi, "Client not connected")) {
 			wifi_websocket_flag = false;
 		}
 		
-		if (strstr(input_line_wifi, "Websocket connected"))            
-		{
+		if (strstr(input_line_wifi, "Websocket connected")) {
 			wifi_websocket_flag = true;
 		}
 		
-		if (strstr(input_line_wifi, "Websocket disconnected"))  
-		{
+		if (strstr(input_line_wifi, "Websocket disconnected")) {
 			wifi_websocket_flag = false;
 		}
 		
-		if (strstr(input_line_wifi, ","))             
-		{
+		if (strstr(input_line_wifi, ",")) {
 			wifi_websocket_flag = true;
 		}
 		
-		if (strstr(input_line_wifi, "2"))
-		{
+		if (strstr(input_line_wifi, "2")) {
 			wifi_status = true;
 		}
 }
@@ -114,6 +108,8 @@ void configure_usart_wifi(void)
 	gpio_configure_pin(PIN_USART0_RXD_IDX, PIN_USART0_RXD_FLAGS);
 	gpio_configure_pin(PIN_USART0_TXD_IDX, PIN_USART0_TXD_FLAGS);
 	gpio_configure_pin(PIN_USART0_CTS_IDX, PIN_USART0_CTS_FLAGS);
+	//gpio_configure_pin(PIN_USART0_RTS_IDX, PIN_USART0_RTS_FLAGS);
+	
 	
 	static uint32_t ul_sysclk;
 	const sam_usart_opt_t usart_console_settings = {
@@ -188,7 +184,7 @@ void configure_wifi_web_setup_pin(void)
 	/* Enable PIO interrupt lines. */
 	pio_enable_interrupt(WIFI_SETUP_PIO, WIFI_SETUP_PIN_NUM);
 	
-	write_wifi_command("web setup mode initiated\r\n", 3);
+	// write_wifi_command("web setup mode initiated\r\n", 3);
 	
 }
 
@@ -221,19 +217,25 @@ void write_image_to_file(void)
 		return;
 	}
 	else {
-		char img_array[1000];
+		char img_array[100] = {0};
 		sprintf(img_array, "image_transfer %d\r\n", img_length);
 		
-		write_wifi_command(img_array, 3);				// write command to the AMW136
-		if(!image_transfer_flag) {						// if image is not passed, don't finish it
-			return;  
+		write_wifi_command(img_array, 2);				// write command to the AMW136
+		counts = 0;
+		bool timeout = false;
+		while(!image_transfer_flag) {
+			if (counts > 3) {
+				timeout = true;
+				break;
+			}
 		}
-
-		for (uint32_t i = start_point; i <= end_point + 1; i++) {
-				usart_putchar(WIFI_USART, image_buffer[i]);
+		if (!timeout) {
+				for (uint32_t i = start_point; i <= end_point + 1; i++) {
+					usart_putchar(WIFI_USART, image_buffer[i]);
+			}	
 		}
 		image_transfer_flag = false;						// reset the flag after data transfer
 		delay_ms(50);										// slight delay according to the step
-	}		
-	
+	}	
+		
 }

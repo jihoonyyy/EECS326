@@ -41,12 +41,12 @@
 
 
 
-#define WIFI_STATUS_PIN		PIO_PB2_IDX
-#define OV2640_RESET_PIN    PIO_PA20_IDX
+#define WIFI_STATUS_PIN		PIO_PB11_IDX			// I used PB2, this is ilya's
+#define OV2640_RESET_PIN    PIO_PA20_IDX			// ilya and i used the same 
 #define WIFI_CTS_PIN		PIO_PA7_IDX
-#define WIFI_RESET_PIN      PIO_PB3_IDX
-#define WIFI_WEB_SETUP_PIN  PIO_PB1_IDX          // Used PB4 for setup pin
-#define WIFI_COMM_PIN		PIO_PB10_IDX
+#define WIFI_RESET_PIN      PIO_PB0_IDX			// used PB3 for ours, this is ilya's
+#define WIFI_WEB_SETUP_PIN  PIO_PA22_IDX          // Used PB4 for ours, this is ilya's
+#define WIFI_COMM_PIN		PIO_PB10_IDX		// ilya and i used a same pin for this
 // #define WIFI_
 
 #endif // CONF_BOARD_H

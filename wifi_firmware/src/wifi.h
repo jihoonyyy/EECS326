@@ -15,7 +15,7 @@
 
 
 #define WIFI_USART                  USART0
-#define WIFI_USART_BAUDRATE			115200
+#define WIFI_USART_BAUDRATE			4000000					///460800        //115200
 #define WIFI_USART_ID				ID_USART0     // Peripheral id
 #define WIFI_USART_IRQn				USART0_IRQn	  // Interrupt 
 #define WIFI_USART_HANDLER			USART0_Handler
@@ -59,11 +59,18 @@
 
 
 // Pin setups for wifi setup, can be changed depending on our setting
-#define WIFI_SETUP_PIN_NUM			PIO_PB1
-#define WIFI_SETUP_PIO				PIOB
-#define WIFI_SETUP_ID				ID_PIOB
+// #define WIFI_SETUP_PIN_NUM			PIO_PB1
+// #define WIFI_SETUP_PIO				PIOB
+// #define WIFI_SETUP_ID				ID_PIOB
+// #define WIFI_SETUP_ATTR				PIO_DEBOUNCE | PIO_IT_FALL_EDGE | PIO_PULLUP
+// #define WIFI_SETUP_PIN				PIO_PB1_IDX
+
+// Ilya's setup
+#define WIFI_SETUP_PIN_NUM			PIO_PA22
+#define WIFI_SETUP_PIO				PIOA
+#define WIFI_SETUP_ID				ID_PIOA
 #define WIFI_SETUP_ATTR				PIO_DEBOUNCE | PIO_IT_FALL_EDGE | PIO_PULLUP
-#define WIFI_SETUP_PIN				PIO_PB1_IDX
+#define WIFI_SETUP_PIN				PIO_PA22_IDX
 
 #define MAX_INPUT_WIFI				1000
 

@@ -52,7 +52,6 @@ int main (void)
 	wifi_comm_success = false;
 	image_transfer_flag = false;
 	web_setup_flag = false;
-	
 	configure_tc();						// Configuring the timer from timer_interface
 	
 	configure_usart_wifi();				// Configuring WIFI USART
@@ -82,16 +81,16 @@ int main (void)
 	// Configure the camera
 	configure_camera();
 
-// 	write_wifi_command("set sy c p off\r\n", 3);					// Telling the wifi chip to turn off the command prompt
-// 	write_wifi_command("set sy c e off\r\n", 3);					// Telling the wifi chip to turn off the echo
-	
-		write_wifi_command("set sy c p on\r\n", 3);					// Telling the wifi chip to turn off the command prompt
-		write_wifi_command("set sy c e on\r\n", 3);					// Telling the wifi chip to turn off the echo
+ 	write_wifi_command("set sy c p off\r\n", 3);					// Telling the wifi chip to turn off the command prompt
+ 	write_wifi_command("set sy c e off\r\n", 3);					// Telling the wifi chip to turn off the echo
+// 	
+//  		write_wifi_command("set sy c p on\r\n", 3);					// Telling the wifi chip to turn off the command prompt
+//  		write_wifi_command("set sy c e on\r\n", 3);					// Telling the wifi chip to turn off the echo
 	
 	while(1)
 	{
 		if (web_setup_flag) {
-			write_wifi_command("setup web\r\n", 3);
+			write_wifi_command("setup web\r\n", 5);
 			web_setup_flag = false;
 			while (!ioport_get_pin_level(WIFI_STATUS_PIN)) {
 			}
@@ -103,14 +102,14 @@ int main (void)
  				delay_ms(100);                      // Delaying for 100 ms, as instructed
  				gpio_set_pin_high(WIFI_RESET_PIN);  // Pulling the pin high
 				while (!wifi_status) {
-					write_wifi_command("get wl n s\r\n",2);
+					write_wifi_command("get wl n s\r\n", 5);
 				}
 			}
 			else 
 			{
 				if (wifi_websocket_flag == false)
 				{
-					write_wifi_command("poll all\r\n",3);
+					write_wifi_command("poll all\r\n",5);
 					delay_ms(1000);
 				}
 				else

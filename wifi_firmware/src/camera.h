@@ -128,7 +128,7 @@
 
 
 
-#define MAX_BUFFER					100000
+#define MAX_BUFFER					20000			//100000
 volatile uint32_t g_ul_vsync_flag;    /* Vsync signal information (true if it's triggered and false otherwise) */
 uint32_t start_point;
 uint32_t end_point;

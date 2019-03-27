@@ -144,7 +144,7 @@ void init_camera(void)
 	
 	
 	
-	pmc_enable_pllbck(7, 0x1, 1); /* PLLA work at 96 Mhz */
+	pmc_enable_pllbck(3, 0x1, 1); /* PLLA work at 96 Mhz */
 	// configure clock pins
 	
 	
@@ -161,7 +161,7 @@ void init_camera(void)
 
 	/* Init PCK0 to work at 24 Mhz */
 	/* 96/4=24 Mhz */
-	PMC->PMC_PCK[1] = (PMC_PCK_PRES_CLK_4 | PMC_PCK_CSS_PLLB_CLK);				// changed from 0 to 1 since we are using PCK1, for address info, refer to page 529 of MCU data sheet
+	PMC->PMC_PCK[1] = (PMC_PCK_PRES_CLK_1 | PMC_PCK_CSS_PLLB_CLK);				// changed from 0 to 1 since we are using PCK1, for address info, refer to page 529 of MCU data sheet
 	PMC->PMC_SCER = PMC_SCER_PCK1;												// changed from 0 to 1 since we are using PCK1
 	while (!(PMC->PMC_SCSR & PMC_SCSR_PCK1)) {									// changed from 0 to 1 since we are using PCK1
 	}
@@ -185,7 +185,7 @@ void configure_camera(void)
 	ov_configure(BOARD_TWI, JPEG_INIT);
 	ov_configure(BOARD_TWI, YUV422);
 	ov_configure(BOARD_TWI, JPEG);
-	ov_configure(BOARD_TWI, JPEG_640x480);
+	ov_configure(BOARD_TWI, JPEG_320x240);								//ov_configure(BOARD_TWI, JPEG_640x480);
 	
 }
 
@@ -215,8 +215,8 @@ uint8_t start_capture(void)
 	
 	/* Capture data and send it to external SRAM memory thanks to PDC
 	 * feature */
-	pio_capture_to_buffer(OV2640_DATA_BUS_PIO, image_buffer, 25000);
-	
+	pio_capture_to_buffer(OV2640_DATA_BUS_PIO, image_buffer, (MAX_BUFFER/4));
+
 	/* Wait end of capture*/
 	while (!((OV2640_DATA_BUS_PIO->PIO_PCISR & PIO_PCIMR_RXBUFF) ==
 			PIO_PCIMR_RXBUFF)) {
