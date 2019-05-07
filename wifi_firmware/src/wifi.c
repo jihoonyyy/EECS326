@@ -152,7 +152,8 @@ void configure_wifi_comm_pin(void)
 	/* Configure PIO clock. */
 	pmc_enable_periph_clk(WIFI_COMM_ID);
 
-	/* Initialize PIO interrupt handler, see PIO definition in conf_board.h
+	/* Initialize PIO interrupt handler, see PIO definition in conf_board.hota
+	
 	**/
 	pio_handler_set(WIFI_COMM_PIO, WIFI_COMM_ID, WIFI_COMM_PIN_NUM, WIFI_COMM_ATTR, wifi_command_response_handler);
 
