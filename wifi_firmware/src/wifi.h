@@ -15,7 +15,7 @@
 
 
 #define WIFI_USART                  USART0
-#define WIFI_USART_BAUDRATE			4000000					///460800        //115200
+#define WIFI_USART_BAUDRATE			115200 //4000000					///460800        //115200
 #define WIFI_USART_ID				ID_USART0     // Peripheral id
 #define WIFI_USART_IRQn				USART0_IRQn	  // Interrupt 
 #define WIFI_USART_HANDLER			USART0_Handler
