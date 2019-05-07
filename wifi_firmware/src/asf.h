@@ -52,6 +52,9 @@
  * running the ASF driver selector tool. Any changes will be discarded.
  */
 
+// From module: ACC - Analog Comparator Controller
+#include <acc.h>
+
 // From module: Common SAM compiler driver
 #include <compiler.h>
 #include <status_codes.h>
@@ -86,6 +89,9 @@
 
 // From module: Part identification macros
 #include <parts.h>
+
+// From module: RE200B PIR sensor
+#include <re200b.h>
 
 // From module: Standard serial I/O (stdio) - SAM implementation
 #include <stdio_serial.h>

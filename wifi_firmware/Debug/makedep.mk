@@ -12,6 +12,10 @@ src\ASF\common\utils\stdio\read.c
 
 src\ASF\common\utils\stdio\write.c
 
+src\ASF\sam\components\pir_sensor\re200b\re200b.c
+
+src\ASF\sam\drivers\acc\acc.c
+
 src\ASF\sam\drivers\pdc\pdc.c
 
 src\ASF\sam\drivers\pio\pio.c
@@ -37,6 +41,8 @@ src\camera.c
 src\ov2640.c
 
 src\ov2640_table_registers.c
+
+src\sensor.c
 
 src\timer_interface.c
 

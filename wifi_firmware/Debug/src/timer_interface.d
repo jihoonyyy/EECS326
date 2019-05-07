@@ -1,5 +1,6 @@
 src/timer_interface.d src/timer_interface.o: ../src/timer_interface.c \
- ../src/timer_interface.h ../src/asf.h ../src/ASF/sam/utils/compiler.h \
+ ../src/timer_interface.h ../src/asf.h ../src/ASF/sam/drivers/acc/acc.h \
+ ../src/ASF/sam/utils/compiler.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\lib\gcc\arm-none-eabi\6.3.1\include\stddef.h \
  ../src/ASF/common/utils/parts.h \
  ../src/ASF/sam/utils/preprocessor/preprocessor.h \
@@ -122,6 +123,7 @@ src/timer_interface.d src/timer_interface.o: ../src/timer_interface.c \
  ../src/ASF/common/services/ioport/ioport.h \
  ../src/ASF/common/services/ioport/sam/ioport_pio.h \
  ../src/ASF/sam/drivers/pdc/pdc.h ../src/ASF/sam/drivers/pmc/sleep.h \
+ ../src/ASF/sam/components/pir_sensor/re200b/re200b.h \
  ../src/ASF/common/utils/stdio/stdio_serial/stdio_serial.h \
  ../src/ASF/common/services/serial/serial.h \
  ../src/ASF/common/services/serial/sam_uart/uart_serial.h \
@@ -143,6 +145,8 @@ src/timer_interface.d src/timer_interface.o: ../src/timer_interface.c \
 ../src/timer_interface.h:
 
 ../src/asf.h:
+
+../src/ASF/sam/drivers/acc/acc.h:
 
 ../src/ASF/sam/utils/compiler.h:
 
@@ -397,6 +401,8 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-no
 ../src/ASF/sam/drivers/pdc/pdc.h:
 
 ../src/ASF/sam/drivers/pmc/sleep.h:
+
+../src/ASF/sam/components/pir_sensor/re200b/re200b.h:
 
 ../src/ASF/common/utils/stdio/stdio_serial/stdio_serial.h:
 
