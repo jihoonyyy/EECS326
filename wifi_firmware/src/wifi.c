@@ -19,6 +19,8 @@ volatile bool wifi_websocket_flag = false;
 volatile bool wifi_status = false;
 
 
+
+
 // Handler for incoming data from the WIFI. Calls process_incoming_byte_wifi when a new byte arrives
 void WIFI_USART_HANDLER(void)														
 {
@@ -213,7 +215,7 @@ void write_image_to_file(void)
 {
 	image_available = find_image_len();
 	img_length = end_point - start_point;
-	
+	int counter = 0;
 	if (image_available == 0) {
 		return;
 	}
@@ -233,10 +235,33 @@ void write_image_to_file(void)
 		if (!timeout) {
 				for (uint32_t i = start_point; i <= end_point + 1; i++) {
 					usart_putchar(WIFI_USART, image_buffer[i]);
+					image_string[counter] = image_buffer[i];
+					counter = counter + 1;
 			}	
 		}
 		image_transfer_flag = false;						// reset the flag after data transfer
-		delay_ms(50);										// slight delay according to the step
+		delay_ms(50);									// slight delay according to the step
 	}	
 		
+}
+
+
+
+void post_image_to_server(void) 
+{
+	write_wifi_command("http_post -o http://18.225.32.67 application/json \n", 5);
+	char command_str[14000];
+	sprintf(command_str, "write 1 14000 \n { \n \"file\": %s \n}\n", image_string);
+	//image_string = strcat(image_string, "\n}");
+	//write_wifi_command(command_str, 5);
+	//write_wifi_command("write 0 14000 \n { \n \"file\":"  "\n}", 5);   
+	//write_wifi_command("http_read_status 1\n", 5);
+	//write_wifi_command("read 1 1000\n", 5);
+	//write_wifi_command("close all\n", 5);
+	
+	usart_write_line(WIFI_USART, command_str);
+	usart_write_line(WIFI_USART, "http_read_status 1\n");
+	usart_write_line(WIFI_USART, "read 1 1000\n");
+	usart_write_line(WIFI_USART, "close all\n");
+	memset(image_string, 0, sizeof(image_string));	
 }

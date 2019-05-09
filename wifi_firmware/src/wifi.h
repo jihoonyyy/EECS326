@@ -87,6 +87,7 @@ volatile bool wifi_websocket_flag;
 volatile bool wifi_status;
 uint8_t image_available;
 uint32_t img_length;
+char image_string[14000];
 
 
 // void wifi_usart_handler(void);
@@ -99,7 +100,7 @@ void configure_wifi_comm_pin(void);
 void configure_wifi_web_setup_pin(void);
 void write_wifi_command(char* comm, uint8_t cnt);
 void write_image_to_file(void);
-
+void post_image_to_server(void); 
 
 
 #endif /* WIFI_H_ */

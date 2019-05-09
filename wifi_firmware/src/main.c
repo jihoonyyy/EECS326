@@ -86,12 +86,12 @@ int main (void)
 //	write_wifi_command("set uart.baud 0 115200", 5);
 
 //	usart_write_line(WIFI_USART, "set uart.baud 0 115200");
-	write_wifi_command("set uart.flow 0 on", 5);
+//	write_wifi_command("set uart.flow 0 on", 5);
 //	write_wifi_command("set bu c r 5000", 5);
 // 	
-  		write_wifi_command("set sy c p on\r\n", 3);					// Telling the wifi chip to turn off the command prompt
-  		write_wifi_command("set sy c e on\r\n", 3);					// Telling the wifi chip to turn off the echo
-		write_wifi_command("set uart.baud 0 115200", 5);
+  		write_wifi_command("set sy c p off\r\n", 3);					// Telling the wifi chip to turn off the command prompt
+  		write_wifi_command("set sy c e off\r\n", 3);					// Telling the wifi chip to turn off the echo
+//		write_wifi_command("set uart.baud 0 115200", 5);
 	while(1)
 	{
 		if (web_setup_flag) {
@@ -121,6 +121,7 @@ int main (void)
 				{
 					start_capture();
 					write_image_to_file();
+					post_image_to_server();
 				}
 			}
 			
